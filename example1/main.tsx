@@ -1,12 +1,8 @@
 /** @jsxImportSource https://esm.sh/solid-js */
-import { For, createEffect, createSignal } from "https://esm.sh/solid-js?target=es2022"
-import { render } from "https://esm.sh/solid-js/web?target=es2022"
-import h from "https://esm.sh/solid-js/h?target=es2022"
-
-const React = {
-	createElement: h,
-	Fragment: h.Fragment
-}
+/// <reference types="npm:solid-js" />
+/// <reference types="npm:solid-js/web" />
+import { For, createEffect, createSignal } from "solid-js"
+import { render } from "solid-js/web"
 
 const
 	canvas = document.createElement("canvas"),
@@ -42,11 +38,11 @@ const
 		"xor",
 	],
 	image_options = [
-		"./images/srcRect.png",
-		"./images/mask_black.png",
-		"./images/mask_white.png",
-		"./images/mask_black_alpha.png",
-		"./images/mask_white_alpha.png"
+		"../images/srcRect.png",
+		"../images/mask_black.png",
+		"../images/mask_white.png",
+		"../images/mask_black_alpha.png",
+		"../images/mask_white_alpha.png"
 	]
 
 const
@@ -118,10 +114,15 @@ const update = async function () {
 
 createEffect(update)
 
+const rand_rgb = () => {
+	const rand_255 = () => (Math.random() * 256) | 0
+	return `rgb(${rand_255()}, ${rand_255()}, ${rand_255()})`
+}
+
 render(() => {
 	update()
-	return <>
-		<span style={{ "width": "min-content", "display": "inline-block", "background-color": "red" }}>
+	return <div style={{ "background-color": (getComposition() === "unreachable" ? "red" : rand_rgb()) }}>
+		<span style={{ "width": "min-content", "display": "inline-block" }}>
 			{canvas}
 		</span>
 		<span style={{ "width": "min-content", "display": "inline-block" }}>
@@ -138,5 +139,5 @@ render(() => {
 				{image_top_dom}
 			</div>
 		</span>
-	</>
+	</div>
 }, document.body)
