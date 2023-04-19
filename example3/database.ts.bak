@@ -1,0 +1,66 @@
+import { DBSchema, openDB } from "https://esm.sh/idb"
+
+interface WordCutoutInfo {
+	/** x-pos in manuscript page */
+	x: number
+	/** y-pos in manuscript page */
+	y: number
+	/** width in manuscript page */
+	width: number
+	/** height in manuscript page */
+	height: number
+	/** left baseline y-pos as a fraction of `this.height`. defaults to 1/2 if undefined */
+	base_y0?: number
+	/** right baseline y-pos as a fraction of `this.height`. defaults to `this.base_y0` if undefined */
+	base_y1?: number
+	/** base64 mask image that is transparent where the pixels are part of the word's stroke line, and opaque where they're part of the background */
+	mask: string
+}
+
+interface SurahManuscriptDB extends DBSchema {
+	surah: {
+		/** surah uint number, starting from 1 and ending at 114 (inclusive) */
+		key: number
+		value: {
+			/** surah name */
+			name: string
+			/** maximum number of words, among all manuscripts */
+			max_words: number
+			manuscript: {
+				/** manuscript uint id */
+				id: number
+				value: {
+					name: string
+					words: {
+						/** word number */
+						id: number
+						value: WordCutoutInfo
+					}
+				}
+			}
+		}
+	}
+}
+
+
+interface MyDB extends DBSchema {
+	book: {
+		key: number
+		value: {
+			name: string
+			chapters: [{
+				id: number
+				name: string
+				chars: number
+				char_ocr: [{
+					id: number
+					x: number
+					y: number
+					width: number
+					height: number
+					mask: Blob
+				}]
+			}]
+		}
+	}
+}

@@ -1,0 +1,63 @@
+import { DBSchema, openDB } from "https://esm.sh/idb"
+import { UnitInterval } from "https://deno.land/x/kitchensink_ts@v0.6.0/typedefs.ts"
+
+type UInt = number
+/** starts from "0001", ends at "0114" */
+type SurahID = UInt
+/** starts from "0000", ends at "9999" */
+type ManuscriptID = UInt
+/** starts from "0001", ends at "9999". "0000" is reserved for background */
+type WordID = UInt
+type WordPartID = 0 | 1 | 2 | 3 | 4
+export type WordUUID = `${SurahID}_${ManuscriptID}_${WordID}p${WordPartID}`
+export type WordUUIdArray = [surah: SurahID, manuscript: ManuscriptID, word: WordID, part: WordPartID]
+
+export interface WordCutoutInfoObj {
+	/** x-pos in manuscript page */
+	x: UInt,
+	/** y-pos in manuscript page */
+	y: UInt,
+	/** width in manuscript page */
+	width: UInt,
+	/** height in manuscript page */
+	height: UInt,
+	/** left baseline y-pos as a fraction of `this.height`. defaults to 1/2 if undefined */
+	baseline_y0?: UnitInterval,
+	/** right baseline y-pos as a fraction of `this.height`. defaults to `this.base_y0` if undefined */
+	baseline_y1?: UnitInterval,
+}
+
+export type WordCutoutInfo = [
+	/** x-pos in manuscript page */
+	x: UInt,
+	/** y-pos in manuscript page */
+	y: UInt,
+	/** width in manuscript page */
+	width: UInt,
+	/** height in manuscript page */
+	height: UInt,
+	/** left baseline y-pos as a fraction of `this.height`. defaults to 1/2 if undefined */
+	baseline_y0?: UnitInterval,
+	/** right baseline y-pos as a fraction of `this.height`. defaults to `this.base_y0` if undefined */
+	baseline_y1?: UnitInterval,
+]
+
+export interface WordCutoutDB extends DBSchema {
+	meta: {
+		key: WordUUID
+		value: WordCutoutInfo
+	}
+	mask: {
+		key: WordUUID
+		/** base64 mask image that is transparent where the pixels are part of the word's stroke line, and opaque where they're part of the background */
+		value: Blob
+	}
+}
+
+export const convertWordUUIdToArray = (uuid: WordUUID): WordUUIdArray => {
+	const
+		[surah_str, manuscript_str, word_and_part_str] = uuid.split("_"),
+		[word_str, part_str] = word_and_part_str.split("p")
+	return [Number(surah_str), Number(manuscript_str), Number(word_str), Number(part_str) as WordPartID]
+}
+
