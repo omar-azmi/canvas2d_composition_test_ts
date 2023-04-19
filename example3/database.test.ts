@@ -1,11 +1,11 @@
 import { IDBPDatabase, ImageBlob, openDB } from "./deps.ts"
-import { convertWordIdToUUId, convertWordUUIdToId, WordCutoutDBMeta, WordCutoutDB, WordId, WordCutout } from "./database.ts"
+import { convertWordIdToUUId, convertWordUUIdToId, WordCutoutInfo, WordCutoutDBSchema, WordId, WordCutout } from "./database.ts"
 
-let wordsDB: IDBPDatabase<WordCutoutDB> | undefined = undefined
+let wordsDB: IDBPDatabase<WordCutoutDBSchema> | undefined = undefined
 
-const getWordsDB = async (): Promise<IDBPDatabase<WordCutoutDB>> => {
+const getWordsDB = async (): Promise<IDBPDatabase<WordCutoutDBSchema>> => {
 	if (wordsDB === undefined) {
-		wordsDB = await openDB<WordCutoutDB>("wordsDB", 1, {
+		wordsDB = await openDB<WordCutoutDBSchema>("wordsDB", 1, {
 			upgrade: (db) => {
 				if (!db.objectStoreNames.contains("meta")) db.createObjectStore("meta", { autoIncrement: false })
 				if (!db.objectStoreNames.contains("mask")) db.createObjectStore("mask", { autoIncrement: false })
@@ -22,7 +22,7 @@ export const WordsData = {
 	 * if you were to `add` an existing key, then an error will be thrown
 	 * @returns a database promise that resolves when writing to the database is successful
 	*/
-	putWord: async (uuid_arr: WordId, info: WordCutoutDBMeta, mask: ImageBlob) => {
+	putWord: async (uuid_arr: WordId, info: WordCutoutInfo, mask: ImageBlob) => {
 		const
 			db = await getWordsDB(),
 			uuid = convertWordIdToUUId(uuid_arr)
@@ -36,7 +36,7 @@ export const WordsData = {
 	 * see {@link WordsData.putWord} for putting a single word info
 	 * @returns a database promise that resolves when writing to the database is successful
 	*/
-	putWords: async (...words: Array<[uuid_arr: WordId, info: WordCutoutDBMeta, mask: ImageBlob]>) => {
+	putWords: async (...words: Array<[uuid_arr: WordId, info: WordCutoutInfo, mask: ImageBlob]>) => {
 		const
 			db = await getWordsDB(),
 			tx = db.transaction(["meta", "mask"], "readwrite"),
